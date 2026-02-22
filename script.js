@@ -1,43 +1,23 @@
-// ===== Estado =====
+// ===== Estado do Jogo =====
+let perguntaAtualIndex = 0;
 let a = 0, b = 0, op = "+";
 let hits = 0, miss = 0;
 let answered = false;
 let hintRunning = false;
 
-// ===== Elementos =====
-const elN1 = document.getElementById("n1");
-const elN2 = document.getElementById("n2");
-const elOp = document.getElementById("op");
-const elOpBadge = document.getElementById("opBadge");
-const elStageCounter = document.getElementById("stageCounter");
-const elFinalQuestionText = document.getElementById("finalQuestionText");
+// Seleção de elementos
+const elN1 = document.getElementById("n1"), elN2 = document.getElementById("n2"), elOp = document.getElementById("op");
+const elOpBadge = document.getElementById("opBadge"), elStageCounter = document.getElementById("stageCounter");
+const elFinalQuestionText = document.getElementById("finalQuestionText"), elBuddyImg = document.getElementById("buddyImg");
+const elDotsA = document.getElementById("dotsA"), elDotsB = document.getElementById("dotsB"), stageInner = document.getElementById("stageInner");
+const elMsg = document.getElementById("message"), elHintText = document.getElementById("hintText");
+const btnReset = document.getElementById("btnReset"), btnHint = document.getElementById("btnHint"), btnNext = document.getElementById("btnNext");
+const buttonsDiv = document.getElementById("buttons"), animLayer = document.getElementById("animLayer");
 
-const elDotsA = document.getElementById("dotsA");
-const elDotsB = document.getElementById("dotsB");
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-const stageInner = document.getElementById("stageInner");
-
-const elMsg = document.getElementById("message");
-const elHintText = document.getElementById("hintText");
-
-const elHits = document.getElementById("hits");
-const elMiss = document.getElementById("miss");
-const elTotal = document.getElementById("total");
-
-const elAvatar = document.getElementById("avatarState");
-const elBuddyTitle = document.getElementById("buddyTitle");
-const elBuddyText = document.getElementById("buddyText");
-
-const btnReset = document.getElementById("btnReset");
-const btnHint = document.getElementById("btnHint");
-const btnNext = document.getElementById("btnNext");
-
-const buttonsDiv = document.getElementById("buttons");
+// Criação dos botões numéricos
 const answerButtons = [];
-
-const animLayer = document.getElementById("animLayer");
-
-// ===== Botões 0..10 =====
 for (let i = 0; i <= 10; i++) {
   const btn = document.createElement("button");
   btn.textContent = i;
@@ -46,287 +26,228 @@ for (let i = 0; i <= 10; i++) {
   answerButtons.push(btn);
 }
 
-// ===== Utils =====
-const wait = (ms) => new Promise(r => setTimeout(r, ms));
-const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
 function setBuddy(state, title, text) {
-  elAvatar.classList.remove("happy", "sad", "neutral");
-  elAvatar.classList.add(state);
-  elBuddyTitle.textContent = title;
-  elBuddyText.textContent = text;
+  elBuddyImg.src = `${state}.png`;
+  document.getElementById("buddyTitle").textContent = title;
+  document.getElementById("buddyText").textContent = text;
 }
 
-function updateStats() {
-  elHits.textContent = hits;
-  elMiss.textContent = miss;
-  elTotal.textContent = hits + miss;
+// Layout de grupos de 3 (Baseado na image_03cc3d.png)
+function getStageSlot(index) {
+  const dotSize = 22, hGap = 8, groupGap = 35, vGap = 20;
+  const row = Math.floor(index / 6); 
+  const colInRow = index % 6;
+  const groupInRow = Math.floor(colInRow / 3); 
+  const x = colInRow * (dotSize + hGap) + (groupInRow * groupGap);
+  const y = row * (dotSize + vGap);
+  return { x, y };
 }
 
-function setAnswerButtonsEnabled(enabled) {
-  answerButtons.forEach(b => b.disabled = !enabled);
-}
-function setControlsEnabled(enabled) {
-  btnHint.disabled = !enabled;
-  btnNext.disabled = !enabled;
-}
-
-function clearStage() {
-  stageInner.innerHTML = "";
-  animLayer.innerHTML = "";
-  elStageCounter.textContent = "?";
-  elStageCounter.style.color = "#94a3b8";
-}
-
-// ATUALIZADO: Suporte para cor azul
 function renderDots(container, count, colorClass) {
   container.innerHTML = "";
   for (let i = 0; i < count; i++) {
     const d = document.createElement("div");
-    d.className = "dot" + (colorClass ? " " + colorClass : "");
+    d.className = "dot" + (colorClass ? " " : "") + colorClass;
     container.appendChild(d);
   }
 }
 
-function correctAnswer() {
-  return (op === "+") ? (a + b) : (a - b);
-}
-
-function getStageSlot(index) {
-  const step = 26;
-  const groupGap = 14;
-  const padX = 12;
-  const padY = 8;
-  const innerW = stageInner.clientWidth || 300;
-  const perRow = Math.max(3, Math.floor((innerW - padX * 2) / step));
-  const col = index % perRow;
-  const row = Math.floor(index / perRow);
-  const groupsBefore = Math.floor(col / 3);
-  const x = padX + col * step + groupsBefore * groupGap;
-  const y = padY + row * step;
-  return { x, y };
-}
-
-// ATUALIZADO: Ghost agora aceita classe de cor flexível
-function createGhostFromDot(dotEl, colorClass) {
+// Funções de auxílio para animação
+function createGhost(dotEl, colorClass) {
   const r = dotEl.getBoundingClientRect();
-  const size = r.width || 18;
-  const half = size / 2;
   const g = document.createElement("div");
-  g.className = "ghost" + (colorClass ? " " + colorClass : "");
-  g.style.left = (r.left + half - (size / 2)) + "px";
-  g.style.top = (r.top + half - (size / 2)) + "px";
-  g.dataset.baseLeft = g.style.left;
-  g.dataset.baseTop = g.style.top;
+  g.className = "ghost " + colorClass;
+  g.style.left = r.left + "px"; g.style.top = r.top + "px";
+  g.dataset.baseLeft = r.left; g.dataset.baseTop = r.top;
   animLayer.appendChild(g);
   return g;
 }
 
-function moveGhostToStageSlot(ghost, slot) {
+function moveGhost(ghost, slot) {
   const stageR = stageInner.getBoundingClientRect();
-  const destX = stageR.left + slot.x;
-  const destY = stageR.top + slot.y;
-  const baseLeft = parseFloat(ghost.dataset.baseLeft);
-  const baseTop = parseFloat(ghost.dataset.baseTop);
-  const dx = destX - baseLeft;
-  const dy = destY - baseTop;
+  const dx = (stageR.left + slot.x) - parseFloat(ghost.dataset.baseLeft);
+  const dy = (stageR.top + slot.y) - parseFloat(ghost.dataset.baseTop);
   ghost.style.transform = `translate(${dx}px, ${dy}px)`;
 }
 
-// ATUALIZADO: Suporte para cor no palco
-function putFixedDot(slot, colorClass) {
-  const d = document.createElement("div");
-  d.className = "stageDot" + (colorClass ? " " + colorClass : "");
-  d.style.left = slot.x + "px";
-  d.style.top = slot.y + "px";
-  stageInner.appendChild(d);
-  return d;
-}
-
-function drawFinalResultDots(count) {
-  stageInner.innerHTML = "";
-  const dots = [];
-  for (let i = 0; i < count; i++) {
-    dots.push(putFixedDot(getStageSlot(i), "")); // Resultado final volta a ser preto
-  }
-  return dots;
-}
-
-async function countPulse(dots) {
-  elStageCounter.textContent = "0";
-  elStageCounter.style.color = "#111827";
-
-  for (let i = 0; i < dots.length; i++) {
-    const d = dots[i];
-    d.classList.add("pulse");
-    elStageCounter.textContent = i + 1;
-    await wait(250);
-    d.classList.remove("pulse");
-    await wait(250);
-  }
-}
-
-function newQuestion() {
-  if (hintRunning) return;
-
-  answered = false;
-  hintRunning = false;
-
-  elMsg.textContent = "";
-  elMsg.className = "msg";
-  elHintText.textContent = "";
-
-  elFinalQuestionText.textContent = "?";
-  elFinalQuestionText.style.color = "#9ca3af";
-
-  setAnswerButtonsEnabled(true);
-  setControlsEnabled(true);
-  clearStage();
-
-  op = (randInt(0, 1) === 0) ? "+" : "-";
-
-  if (op === "+") {
-    a = randInt(0, 10);
-    b = randInt(0, 10 - a);
-  } else {
-    a = randInt(0, 10);
-    b = randInt(0, a);
-  }
-
-  elN1.textContent = a;
-  elN2.textContent = b;
-  elOp.textContent = op;
-  elOpBadge.textContent = op;
-
-  renderDots(elDotsA, a, "");
-  // SE FOR SOMA, B É AZUL. SE FOR SUBTRAÇÃO, B É VERMELHO.
-  renderDots(elDotsB, b, (op === "+" ? "blue" : "red"));
-
-  setBuddy("neutral", "Sua vez! 🙂", "Use a Dica se precisar.");
-}
-
-function checkAnswer(value) {
+async function checkAnswer(value) {
   if (answered || hintRunning) return;
-
-  const correct = correctAnswer();
+  const correct = (op === "+") ? (a + b) : (a - b);
   answered = true;
-  setAnswerButtonsEnabled(false);
-
+  answerButtons.forEach(b => b.disabled = true);
+  
   elFinalQuestionText.textContent = value;
-  elFinalQuestionText.style.color = "#111827";
-
-  elStageCounter.textContent = correct;
-  elStageCounter.style.color = "#111827";
+  elFinalQuestionText.style.color = (value === correct) ? "#16a34a" : "#dc2626";
 
   if (value === correct) {
     hits++;
     elMsg.textContent = "Acertou! 🎉";
-    elMsg.className = "msg ok";
-    setBuddy("happy", "Uhuu! 😄", "Mandou bem! Aperte Próxima.");
+    setBuddy("acertou", "Incrível!", "Você domina tudo!");
   } else {
     miss++;
-    elMsg.textContent = `Quase! A resposta é ${correct}.`;
-    elMsg.className = "msg bad";
-    setBuddy("sad", "Ahh 😢", "Tudo bem! Aperte Próxima.");
+    elMsg.textContent = "Ops! Vamos ver?";
+    setBuddy("errou", "Observe...", "Vou te ensinar o caminho.");
+    await wait(1000);
+    showHint();
   }
-  updateStats();
+  document.getElementById("hits").textContent = hits;
+  document.getElementById("miss").textContent = miss;
 }
 
 async function showHint() {
   if (hintRunning) return;
-  if (answered) return;
-
   hintRunning = true;
-  setControlsEnabled(false);
-  setAnswerButtonsEnabled(false);
-  clearStage();
+  btnHint.disabled = true;
+  stageInner.innerHTML = ""; elStageCounter.textContent = "0";
 
-  const result = correctAnswer();
-  const dotsA = [...elDotsA.querySelectorAll(".dot")];
-  const dotsB = [...elDotsB.querySelectorAll(".dot")];
-
-  dotsA.forEach(d => d.style.opacity = "0.15");
-  dotsB.forEach(d => d.style.opacity = "0.15");
+  const result = (op === "+") ? (a + b) : (a - b);
+  const dtsA = [...elDotsA.querySelectorAll(".dot")], dtsB = [...elDotsB.querySelectorAll(".dot")];
 
   if (op === "+") {
-    elHintText.textContent = "Dica: juntando os grupos no palco…";
-    const ghosts = [];
-    // A é preto, B é azul
-    dotsA.forEach(d => ghosts.push(createGhostFromDot(d, "")));
-    dotsB.forEach(d => ghosts.push(createGhostFromDot(d, "blue")));
-
-    ghosts.forEach((g, i) => {
-      const slot = getStageSlot(i);
-      setTimeout(() => moveGhostToStageSlot(g, slot), 40 + i * 25);
-    });
-
-    await wait(40 + ghosts.length * 25 + 650);
+    const ghosts = [...dtsA.map(d => createGhost(d, "")), ...dtsB.map(d => createGhost(d, "blue"))];
+    ghosts.forEach((g, i) => setTimeout(() => moveGhost(g, getStageSlot(i)), i * 50));
+    await wait(ghosts.length * 50 + 600);
     animLayer.innerHTML = "";
-    
-    // Mostra as bolinhas no palco respeitando as cores iniciais antes de virarem resultado
-    stageInner.innerHTML = "";
-    const tempDots = [];
-    for(let i=0; i<a; i++) tempDots.push(putFixedDot(getStageSlot(i), ""));
-    for(let i=0; i<b; i++) tempDots.push(putFixedDot(getStageSlot(a+i), "blue"));
-
-    elHintText.textContent = `Viu? ${a} pretas e ${b} azuis dão ${result}!`;
-    await wait(200);
-    await countPulse(tempDots);
-
+    const stageDots = [];
+    for(let i=0; i<a; i++) stageDots.push(putFixedDot(i, ""));
+    for(let i=0; i<b; i++) stageDots.push(putFixedDot(a+i, "blue"));
+    await countPulse(stageDots);
+// ... dentro da função showHint(), no bloco do else (op === "-") ...
   } else {
-    elHintText.textContent = "Dica: vermelho mostra o que sai (−)…";
-    const ghostsBlack = dotsA.map(d => createGhostFromDot(d, ""));
-    ghostsBlack.forEach((g, i) => {
-      const slot = getStageSlot(i);
-      setTimeout(() => moveGhostToStageSlot(g, slot), 40 + i * 22);
-    });
-    await wait(40 + ghostsBlack.length * 22 + 650);
-
-    const ghostsRed = dotsB.map(d => createGhostFromDot(d, "red"));
-    ghostsRed.forEach((g, i) => {
-      const slotIndex = result + i;
-      const slot = getStageSlot(slotIndex);
-      setTimeout(() => moveGhostToStageSlot(g, slot), 60 + i * 45);
-    });
-    await wait(60 + ghostsRed.length * 45 + 650);
-
+    //elHintText.textContent = "O resultado ficou negativo, muitas bolinhas vermelhas.";
+    
+    // 1. Move as pretas (Número A) para o palco (0, 1, 2...)
+    const ghostsA = dtsA.map(d => createGhost(d, ""));
+    ghostsA.forEach((g, i) => setTimeout(() => moveGhost(g, getStageSlot(i)), i * 50));
+    await wait(a * 50 + 600);
+    
     animLayer.innerHTML = "";
+    const fixedA = [];
+    for(let i=0; i<a; i++) fixedA.push(putFixedDot(i, ""));
+    await wait(500);
+
+    // 2. Move as vermelhas (Número B) para anular as pretas do FIM para o COMEÇO
+    const ghostsB = dtsB.map((d, i) => {
+      const g = createGhost(d, "red");
+      
+      // Se i for menor que 'a', ela vai anular a bolinha preta na posição (a - 1 - i)
+      // Se i for maior ou igual a 'a', ela vai sobrar como negativa na posição (i)
+      const isNegativeBalance = (i >= a);
+      const targetIndex = isNegativeBalance ? i : (a - 1 - i);
+      const slot = getStageSlot(targetIndex);
+      
+      setTimeout(async () => {
+        moveGhost(g, slot);
+        await wait(550);
+        
+        g.style.opacity = "0";
+        if (!isNegativeBalance) {
+          // Anula a bolinha preta existente
+          if(fixedA[targetIndex]) fixedA[targetIndex].style.opacity = "0";
+        } else {
+          // Cria a bolinha de saldo negativo
+          putFixedDot(targetIndex, "negative-result");
+        }
+      }, i * 200);
+      return g;
+    });
+
+    await wait(b * 200 + 800);
+    
+    // 3. Limpeza e Contagem Final
     stageInner.innerHTML = "";
-    const fixedRed = [];
-    const tempDotsSub = [];
-    for (let i = 0; i < result; i++) {
-      tempDotsSub.push(putFixedDot(getStageSlot(i), ""));
+    const remain = [];
+    
+    if (result >= 0) {
+      for(let i=0; i<result; i++) remain.push(putFixedDot(i, ""));
+      await countPulse(remain);
+    } else {
+      // Caso negativo: Mostra o saldo devedor
+      const numNegativos = Math.abs(result);
+      elStageCounter.classList.add("negative");
+      for(let i=0; i<numNegativos; i++) {
+        // As bolinhas negativas aparecem nas primeiras posições para facilitar a contagem
+        remain.push(putFixedDot(i, "negative-result"));
+      }
+      
+      // Contagem pulsante com sinal de menos
+      for (let i = 0; i < remain.length; i++) {
+        remain[i].classList.add("pulse");
+        elStageCounter.textContent = "-" + (i + 1);
+        await wait(400);
+        remain[i].classList.remove("pulse");
+      }
     }
-    for (let i = 0; i < b; i++) {
-      fixedRed.push(putFixedDot(getStageSlot(result + i), "red"));
-    }
-
-    elHintText.textContent = "Veja: preto fica, vermelho sai…";
-    await wait(700);
-
-    fixedRed.forEach((d, i) => setTimeout(() => d.style.opacity = "0", 40 + i * 35));
-    await wait(40 + fixedRed.length * 35 + 250);
-
-    elHintText.textContent = `Restaram apenas ${result} pretas!`;
-    await wait(200);
-    await countPulse(tempDotsSub);
   }
-
-  hintRunning = false;
-  setControlsEnabled(true);
-  setAnswerButtonsEnabled(true);
-  setBuddy("neutral", "Agora tenta 🙂", "Escolha o número certo!");
+  
+  // Voo final com o valor (positivo ou negativo)
+  await animateNumberToEquation(result);
+  elStageCounter.classList.remove("negative"); // Reseta para a próxima
+  hintRunning = false; btnHint.disabled = false;
 }
 
-function resetGame() {
-  hits = 0; miss = 0;
-  updateStats();
-  setBuddy("neutral", "Recomeçou 🙂", "Vamos de novo!");
-  newQuestion();
+function putFixedDot(i, cls) {
+  const d = document.createElement("div");
+  d.className = "stageDot " + cls;
+  const s = getStageSlot(i); d.style.left = s.x+"px"; d.style.top = s.y+"px";
+  stageInner.appendChild(d); return d;
 }
 
-btnReset.addEventListener("click", resetGame);
+async function countPulse(dots) {
+  for (let i = 0; i < dots.length; i++) {
+    dots[i].classList.add("pulse");
+    elStageCounter.textContent = i + 1;
+    await wait(350); dots[i].classList.remove("pulse");
+  }
+}
+
+async function animateNumberToEquation(finalValue) {
+  const start = elStageCounter.getBoundingClientRect(), end = elFinalQuestionText.getBoundingClientRect();
+  const flyer = document.createElement("div");
+  flyer.className = "flying-number"; flyer.textContent = finalValue;
+  flyer.style.width = start.width + "px"; flyer.style.height = start.height + "px";
+  flyer.style.left = start.left + "px"; flyer.style.top = start.top + "px";
+  flyer.style.fontSize = window.getComputedStyle(elStageCounter).fontSize;
+  document.body.appendChild(flyer);
+
+  elFinalQuestionText.style.visibility = "hidden"; // Mantém o espaço para não mover a conta
+  await wait(20);
+
+  const moveX = (end.left + end.width/2) - (start.left + start.width/2);
+  const moveY = (end.top + end.height/2) - (start.top + start.height/2);
+  const scale = parseFloat(window.getComputedStyle(elFinalQuestionText).fontSize) / parseFloat(window.getComputedStyle(elStageCounter).fontSize);
+
+  flyer.style.transform = `translate(${moveX}px, ${moveY}px) scale(${scale})`;
+  await wait(850);
+  
+  elFinalQuestionText.textContent = finalValue;
+  elFinalQuestionText.style.visibility = "visible";
+  elFinalQuestionText.style.color = "#111827";
+  elFinalQuestionText.style.transform = "scale(1.3)";
+  await wait(150); elFinalQuestionText.style.transform = "scale(1)";
+  flyer.remove();
+}
+
+function newQuestion() {
+  answered = false; hintRunning = false;
+  elMsg.textContent = ""; elHintText.textContent = "";
+  elFinalQuestionText.textContent = "?"; elFinalQuestionText.style.color = "#9ca3af";
+  elFinalQuestionText.style.visibility = "visible"; elStageCounter.textContent = "?";
+  stageInner.innerHTML = ""; animLayer.innerHTML = "";
+  answerButtons.forEach(b => b.disabled = false);
+
+  const conta = bancoDeContas.contas[perguntaAtualIndex];
+  a = conta.a; b = conta.b; op = conta.operacao;
+  elN1.textContent = a; elN2.textContent = b; elOp.textContent = op; elOpBadge.textContent = op;
+
+  renderDots(elDotsA, a, "");
+  renderDots(elDotsB, b, (op === "+" ? "blue" : "red"));
+  setBuddy("espera", `Nível ${conta.nivel}`, "Quanto dá?");
+
+  perguntaAtualIndex = (perguntaAtualIndex + 1) % bancoDeContas.contas.length;
+}
+
 btnNext.addEventListener("click", newQuestion);
+btnReset.addEventListener("click", () => { hits=0; miss=0; perguntaAtualIndex=0; newQuestion(); });
 btnHint.addEventListener("click", showHint);
-
-resetGame();
+newQuestion();

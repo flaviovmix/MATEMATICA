@@ -3,16 +3,44 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Somar e Subtrair até 10</title>
+  <title>Adição e Subtração</title>
   <link rel="stylesheet" href="./style.css">
+  
+  <script id="dados-jogo">
+    const bancoDeContas = {
+      "jogo": "Adição e Subtração",
+      "versao": 1,
+      "contas": [
+          { "id": 1,  "nivel": 1, "operacao": "+", "a": 9,  "b": 3},
+          { "id": 2,  "nivel": 1, "operacao": "+", "a": 4,  "b": 1},
+          { "id": 3,  "nivel": 1, "operacao": "+", "a": 6,  "b": 2},
+          { "id": 4,  "nivel": 1, "operacao": "+", "a": 3,  "b": 2},
+          { "id": 5,  "nivel": 1, "operacao": "+", "a": 8,  "b": 5},
+          { "id": 6,  "nivel": 2, "operacao": "+", "a": 7,  "b": 2},
+          { "id": 7,  "nivel": 2, "operacao": "+", "a": 9,  "b": 4},
+          { "id": 8,  "nivel": 2, "operacao": "+", "a": 6,  "b": 3},
+          { "id": 9,  "nivel": 2, "operacao": "+", "a": 10, "b": 4},
+          { "id": 10, "nivel": 2, "operacao": "+", "a": 5,  "b": 4},
+          { "id": 11, "nivel": 3, "operacao": "+", "a": 8,  "b": 2},
+          { "id": 12, "nivel": 3, "operacao": "+", "a": 10, "b": 5},
+          { "id": 13, "nivel": 3, "operacao": "+", "a": 1,  "b": 9},
+          { "id": 14, "nivel": 3, "operacao": "+", "a": 7,  "b": 1},
+          { "id": 15, "nivel": 3, "operacao": "+", "a": 2,  "b": 6 }
+        ]
+    };
+  </script>
 </head>
 
 <body>
   <div class="app">
     <header>
       <div>
-        <h1>Somar e Subtrair até 10</h1>
-        <p>Dica: o resultado aparece em grupos de 3 e depois a contagem anima.</p>
+        <h1>Matemática</h1>
+        <div class="stats">
+          <div class="pill">Acertos: <strong id="hits">0</strong></div>
+          <div class="pill">Erros: <strong id="miss">0</strong></div>
+          <div class="pill">Total: <strong id="total">0</strong></div>
+        </div>
       </div>
       <button class="btn btn-reset" id="btnReset" type="button">Zerar</button>
     </header>
@@ -24,9 +52,7 @@
             <div class="zoneTitle">1º número</div>
             <div class="dots" id="dotsA"></div>
           </div>
-
           <div class="opBadge" id="opBadge">+</div>
-
           <div class="zone" id="zoneB">
             <div class="zoneTitle">2º número</div>
             <div class="dots" id="dotsB"></div>
@@ -39,13 +65,13 @@
           <div id="stageCounter" class="stageCounter">?</div>
         </div>
 
-        <div class="question" aria-live="polite">
+        <div class="question">
           <div class="big">
             <span id="n1">?</span>
             <span id="op">+</span>
             <span id="n2">?</span>
             =
-            <span id="finalQuestionText" style="color:#9ca3af">?</span>
+            <span id="finalQuestionText">?</span>
           </div>
         </div>
 
@@ -59,23 +85,14 @@
 
         <div id="hintText" class="hintText"></div>
 
-        <div class="stats">
-          <div class="pill">Acertos: <strong id="hits">0</strong></div>
-          <div class="pill">Erros: <strong id="miss">0</strong></div>
-          <div class="pill">Total: <strong id="total">0</strong></div>
-        </div>
       </div>
 
       <div class="card buddy">
-        <div id="avatarState" class="avatar neutral" aria-label="Personagem">
-          <div class="face">
-            <div class="eye left"></div>
-            <div class="eye right"></div>
-            <div class="mouth"></div>
-          </div>
+        <div class="avatar-container">
+          <img src="espera.png" id="buddyImg" alt="Personagem" class="buddy-img">
         </div>
-        <h2 id="buddyTitle">Vamos jogar! 🙂</h2>
-        <p id="buddyText">Escolha um número de 0 a 10.</p>
+        <h2 id="buddyTitle">Vamos começar!</h2>
+        <p id="buddyText">Escolha um número.</p>
       </div>
     </div>
   </div>
