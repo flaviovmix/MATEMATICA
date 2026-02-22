@@ -115,6 +115,7 @@ async function showHint() {
   if (hintRunning) return;
   hintRunning = true;
   btnHint.disabled = true;
+  btnNext.disabled = true;
   stageInner.innerHTML = ""; elStageCounter.textContent = "0";
 
   const result = (op === "+") ? (a + b) : (a - b);
@@ -200,7 +201,9 @@ async function showHint() {
   // Voo final com o valor (positivo ou negativo)
   await animateNumberToEquation(result);
   elStageCounter.classList.remove("negative"); // Reseta para a próxima
-  hintRunning = false; btnHint.disabled = false;
+  hintRunning = false; 
+  btnHint.disabled = false;
+  btnNext.disabled = false; 
 }
 
 function putFixedDot(i, cls) {
