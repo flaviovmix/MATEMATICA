@@ -1,32 +1,34 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Adição e Subtração</title>
   <link rel="stylesheet" href="./style.css">
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <script id="dados-jogo">
     const bancoDeContas = {
       "jogo": "Adição e Subtração",
       "versao": 1,
       "contas": [
-          { "id": 1,  "nivel": 1, "operacao": "-", "a": 9,  "b": 3},
-          { "id": 2,  "nivel": 1, "operacao": "+", "a": 4,  "b": 1},
-          { "id": 3,  "nivel": 1, "operacao": "-", "a": 6,  "b": 2},
-          { "id": 4,  "nivel": 1, "operacao": "+", "a": 3,  "b": 2},
-          { "id": 5,  "nivel": 1, "operacao": "-", "a": 8,  "b": 5},
-          { "id": 6,  "nivel": 2, "operacao": "+", "a": 7,  "b": 2},
-          { "id": 7,  "nivel": 2, "operacao": "-", "a": 9,  "b": 4},
-          { "id": 8,  "nivel": 2, "operacao": "+", "a": 6,  "b": 3},
-          { "id": 9,  "nivel": 2, "operacao": "-", "a": 10, "b": 4},
-          { "id": 10, "nivel": 2, "operacao": "+", "a": 5,  "b": 4},
-          { "id": 11, "nivel": 3, "operacao": "+", "a": 8,  "b": 2},
-          { "id": 12, "nivel": 3, "operacao": "-", "a": 10, "b": 5},
-          { "id": 13, "nivel": 3, "operacao": "+", "a": 1,  "b": 9},
-          { "id": 14, "nivel": 3, "operacao": "-", "a": 7,  "b": 1},
-          { "id": 15, "nivel": 3, "operacao": "+", "a": 2,  "b": 6 }
-        ]
+        { "id": 1, "nivel": 1, "operacao": "+", "a": 5, "b": 3 },
+        { "id": 2, "nivel": 1, "operacao": "+", "a": 4, "b": 1 },
+        { "id": 3, "nivel": 1, "operacao": "-", "a": 6, "b": 2 },
+        { "id": 4, "nivel": 1, "operacao": "+", "a": 3, "b": 2 },
+        { "id": 5, "nivel": 1, "operacao": "-", "a": 8, "b": 5 },
+        { "id": 6, "nivel": 2, "operacao": "+", "a": 7, "b": 2 },
+        { "id": 7, "nivel": 2, "operacao": "-", "a": 9, "b": 4 },
+        { "id": 8, "nivel": 2, "operacao": "+", "a": 6, "b": 3 },
+        { "id": 9, "nivel": 2, "operacao": "-", "a": 10, "b": 4 },
+        { "id": 10, "nivel": 2, "operacao": "+", "a": 5, "b": 4 },
+        { "id": 11, "nivel": 3, "operacao": "+", "a": 8, "b": 2 },
+        { "id": 12, "nivel": 3, "operacao": "-", "a": 10, "b": 5 },
+        { "id": 13, "nivel": 3, "operacao": "+", "a": 1, "b": 9 },
+        { "id": 14, "nivel": 3, "operacao": "-", "a": 7, "b": 1 },
+        { "id": 15, "nivel": 3, "operacao": "+", "a": 2, "b": 6 }
+      ]
     };
   </script>
 </head>
@@ -39,10 +41,12 @@
         <div class="stats">
           <div class="pill">Acertos: <strong id="hits">0</strong></div>
           <div class="pill">Erros: <strong id="miss">0</strong></div>
-          <div class="pill">Total: <strong id="total">0</strong></div>
+          <div class="pill">Total de: <strong id="total">15</strong></div>
         </div>
       </div>
-      <button class="btn btn-reset" id="btnReset" type="button">Zerar</button>
+      <button class="btn btn-reset" id="btnReset" type="button">
+        <i class="fa-solid fa-rotate-left"></i> Recomeçar
+      </button>
     </header>
 
     <div class="content">
@@ -60,7 +64,7 @@
         </div>
 
         <div class="stage" id="stage">
-          <div class="stageTitle">Resultado (palco)</div>
+          <div class="stageTitle">(dica)</div>
           <div class="stageInner" id="stageInner"></div>
           <div id="stageCounter" class="stageCounter">?</div>
         </div>
@@ -79,8 +83,13 @@
         <div id="message" class="msg"></div>
 
         <div class="controls">
-          <button class="btn btn-hint" id="btnHint" type="button">Dica</button>
-          <button class="btn btn-next" id="btnNext" type="button">Próxima</button>
+          <button class="btn btn-hint" id="btnHint" type="button">
+            <i class="fa-solid fa-graduation-cap"></i> Dica / Explicar
+          </button>
+
+          <button class="btn btn-next" id="btnNext" type="button">
+            Próxima <i class="fa-solid fa-arrow-right"></i>
+          </button>
         </div>
 
         <div id="hintText" class="hintText"></div>
@@ -100,4 +109,5 @@
   <div id="animLayer"></div>
   <script src="./script.js"></script>
 </body>
+
 </html>

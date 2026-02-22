@@ -33,13 +33,26 @@ function setBuddy(state, title, text) {
 }
 
 // Layout de grupos de 3 (Baseado na image_03cc3d.png)
+// Layout compacto e contínuo, igual ao das zonas superiores
+// Layout de grupos de 3 (igual ao espaçamento do 1º número)
 function getStageSlot(index) {
-  const dotSize = 22, hGap = 8, groupGap = 35, vGap = 20;
-  const row = Math.floor(index / 6); 
-  const colInRow = index % 6;
-  const groupInRow = Math.floor(colInRow / 3); 
+  // pega do CSS pra palco ficar 1:1 com .dots
+  const css = getComputedStyle(document.documentElement);
+  const dotSize = parseFloat(css.getPropertyValue("--dot")) || 22;
+  const gap = parseFloat(css.getPropertyValue("--dotGap")) || 10;
+
+  const hGap = gap;          // horizontal igual ao .dots
+  const vGap = gap;          // vertical igual ao .dots  ✅ aqui é a chave
+  const groupGap = gap * 2;  // espaço extra entre grupos de 3 (ajustável)
+
+  const perRow = 6; // 6 por linha (2 grupos de 3)
+  const row = Math.floor(index / perRow);
+  const colInRow = index % perRow;
+  const groupInRow = Math.floor(colInRow / 3);
+
   const x = colInRow * (dotSize + hGap) + (groupInRow * groupGap);
   const y = row * (dotSize + vGap);
+
   return { x, y };
 }
 
