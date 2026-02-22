@@ -48,7 +48,7 @@ for (let i = 0; i <= 10; i++) {
 
 // ===== Helpers UI =====
 function setBuddy(state, title, text) {
-  elBuddyImg.src = `${state}.png`;
+  elBuddyImg.src = `../${state}.png`;
   document.getElementById("buddyTitle").textContent = title;
   document.getElementById("buddyText").textContent = text;
 }
