@@ -96,6 +96,10 @@ async function checkAnswer(value) {
     hits++;
     elMsg.textContent = "Acertou! 🎉";
     setBuddy("acertou", "Incrível!", "Você domina tudo!");
+
+    // ✅ roda a animação mesmo acertando
+    await wait(400);     // opcional: dá tempo de ver o "Acertou!"
+    await showHint();    // chama a animação das bolinhas
   } else {
     miss++;
     elMsg.textContent = "Ops! Vamos ver?";
