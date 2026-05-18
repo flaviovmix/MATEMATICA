@@ -36,19 +36,48 @@ const animLayer = document.getElementById("animLayer");
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-// ===== Botões numéricos (0..10) =====
+const imgPrefix = (() => {
+  const s = document.querySelector('script[src*="script.js"]');
+  if (!s) return "";
+  const src = s.getAttribute("src");
+  return src.substring(0, src.lastIndexOf("/") + 1);
+})();
+
+// ===== Botões de resposta (5 opções: 1 certa + 4 erradas) =====
 const answerButtons = [];
-for (let i = 0; i <= 10; i++) {
-  const btn = document.createElement("button");
-  btn.textContent = i;
-  btn.addEventListener("click", () => checkAnswer(i));
-  buttonsDiv.appendChild(btn);
-  answerButtons.push(btn);
+
+function generateOptions(correct) {
+  const options = new Set([correct]);
+  while (options.size < 5) {
+    const offset = Math.floor(Math.random() * 5) + 1;
+    let d = Math.random() < 0.5 ? correct - offset : correct + offset;
+    if (d < 0) d = correct + offset;
+    options.add(d);
+  }
+  const arr = [...options];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderAnswerButtons(correct) {
+  buttonsDiv.innerHTML = "";
+  answerButtons.length = 0;
+  const options = generateOptions(correct);
+  for (const val of options) {
+    const btn = document.createElement("button");
+    btn.textContent = val;
+    btn.addEventListener("click", () => checkAnswer(val));
+    buttonsDiv.appendChild(btn);
+    answerButtons.push(btn);
+  }
 }
 
 // ===== Helpers UI =====
 function setBuddy(state, title, text) {
-  elBuddyImg.src = `../${state}.png`;
+  elBuddyImg.src = `${imgPrefix}${state}.png`;
   document.getElementById("buddyTitle").textContent = title;
   document.getElementById("buddyText").textContent = text;
 }
@@ -95,10 +124,29 @@ function getStageSlot(index) {
 
 function renderDots(container, count, colorClass) {
   container.innerHTML = "";
-  for (let i = 0; i < count; i++) {
-    const d = document.createElement("div");
-    d.className = "dot" + (colorClass ? " " : "") + colorClass;
-    container.appendChild(d);
+  const tens = Math.floor(count / 10);
+  const units = count % 10;
+
+  for (let i = 0; i < tens; i++) {
+    const bar = document.createElement("div");
+    bar.className = "bar" + (colorClass ? " " + colorClass : "");
+    for (let j = 0; j < 10; j++) {
+      const u = document.createElement("div");
+      u.className = "bar-unit";
+      bar.appendChild(u);
+    }
+    container.appendChild(bar);
+  }
+
+  if (units > 0) {
+    const row = document.createElement("div");
+    row.className = "units";
+    for (let i = 0; i < units; i++) {
+      const d = document.createElement("div");
+      d.className = "dot" + (colorClass ? " " + colorClass : "");
+      row.appendChild(d);
+    }
+    container.appendChild(row);
   }
 }
 
@@ -126,7 +174,7 @@ function moveGhost(ghost, slot) {
 async function checkAnswer(value) {
   if (answered || hintRunning) return;
 
-  const correct = (op === "+") ? (a + b) : (a - b);
+  const correct = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
 
   // AQUI é o ponto que você pediu:
   // desativa os botões numéricos e ativa o Próxima
@@ -182,7 +230,7 @@ async function showHint() {
   elStageCounter.textContent = "0";
   elStageCounter.classList.remove("negative");
 
-  const result = (op === "+") ? (a + b) : (a - b);
+  const result = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
 
   const dtsA = [...elDotsA.querySelectorAll(".dot")];
   const dtsB = [...elDotsB.querySelectorAll(".dot")];
@@ -205,7 +253,7 @@ async function showHint() {
 
     await countPulse(stageDots);
 
-  } else {
+  } else if (op === "-") {
     // SUBTRAÇÃO
     // 1) Move A pro palco
     const ghostsA = dtsA.map(d => createGhost(d, ""));
@@ -263,6 +311,15 @@ async function showHint() {
         remain[i].classList.remove("pulse");
       }
     }
+  } else {
+    // MULTIPLICAÇÃO: mostra a×b cubinhos no palco
+    const total = a * b;
+    const stageDots = [];
+    for (let i = 0; i < total; i++) {
+      stageDots.push(putFixedDot(i, "green"));
+    }
+    await wait(300);
+    await countPulse(stageDots);
   }
 
   // número voando pro resultado
@@ -360,14 +417,14 @@ function newQuestion() {
   stageInner.innerHTML = "";
   animLayer.innerHTML = "";
 
-  // botões numéricos ativos
-  setAnswerButtonsDisabled(false);
-
   // carrega conta
   const conta = bancoDeContas.contas[perguntaAtualIndex];
   a = conta.a;
   b = conta.b;
   op = conta.operacao;
+
+  const correct = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
+  renderAnswerButtons(correct);
 
   elN1.textContent = a;
   elN2.textContent = b;
@@ -375,7 +432,7 @@ function newQuestion() {
   elOpBadge.textContent = op;
 
   renderDots(elDotsA, a, "");
-  renderDots(elDotsB, b, (op === "+" ? "blue" : "red"));
+  renderDots(elDotsB, b, (op === "+" ? "blue" : op === "-" ? "red" : "green"));
 
   setBuddy("espera", `Nível ${conta.nivel}`, "Quanto dá?");
 

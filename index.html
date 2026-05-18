@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Adição e Subtração</title>
-  <link rel="stylesheet" href="../style.css">
+  <title>Misturado</title>
+  <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   
@@ -73,7 +73,7 @@
         <div class="btn-niveis">
 
           <button class="nivel muito-facil"
-              onclick="window.location.href='muitoFacil.html'">
+              onclick="window.location.href='misturado/muitoFacil.html'">
               <i class="fa-solid fa-circle-check"></i>
             Muito Fácil
           </button>
@@ -99,9 +99,10 @@
 
           <div class="operacoes">
             <select id="operacao">
-              <option value="../soma.html">➕ Somar</option>
-              <option value="../subtracao.html">➖ Subtrair</option>
+              <option value="soma.html">➕ Somar</option>
+              <option value="subtracao.html">➖ Subtrair</option>
               <option value="misturado.html" selected>🔢 Misturado</option>
+              <option value="multiplicacao.html">✖️ Multiplicar</option>
             </select>
           </div>
         <div class="stats">
@@ -109,6 +110,7 @@
           <div class="pill">Erros: <strong id="miss">0</strong></div>
           <div class="pill">Total de: <strong id="total">0</strong><strong> de 30</strong></div>
         </div>
+      </div>
       </div>
       <button class="btn btn-reset" id="btnReset" type="button">
         <i class="fa-solid fa-rotate-left"></i> 
@@ -164,7 +166,7 @@
 
       <div class="card buddy">
         <div class="avatar-container">
-          <img src="../espera.png" id="buddyImg" alt="Personagem" class="buddy-img">
+          <img src="espera.png" id="buddyImg" alt="Personagem" class="buddy-img">
         </div>
         <h2 id="buddyTitle">Vamos começar!</h2>
         <p id="buddyText">Escolha um número.</p>
@@ -173,7 +175,7 @@
   </div>
 
   <div id="animLayer"></div>
-  <script src="../script.js"></script>
+  <script src="./script.js"></script>
 
   <script>
     document.getElementById("operacao")

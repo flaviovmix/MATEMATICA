@@ -85,7 +85,6 @@ header p {
   right: 15px;
   width: 65px;
   height: 40px;
-  display: none;
 }
 
 .btn-hint {
@@ -151,8 +150,55 @@ header p {
 .dots {
   margin-top: 20px;
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.units {
+  display: flex;
   flex-wrap: wrap;
   gap: var(--dotGap);
+}
+
+.bar {
+  display: flex;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-unit {
+  width: var(--dot);
+  height: var(--dot);
+  background: #111827;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+.bar-unit:last-child {
+  border-right: none;
+}
+
+.bar.blue .bar-unit {
+  background: var(--blue);
+}
+
+.bar.red .bar-unit {
+  background: var(--bad);
+}
+
+.bar.green .bar-unit {
+  background: #16a34a;
+}
+
+.dot.green {
+  background: #16a34a;
+}
+
+.stageDot.green {
+  background: #16a34a;
+}
+
+.ghost.green {
+  background: #16a34a;
 }
 
 .opBadge {
@@ -211,7 +257,7 @@ header p {
 .dot {
   width: var(--dot);
   height: var(--dot);
-  border-radius: 50%;
+  border-radius: 3px;
   background: #111827;
 }
 
@@ -227,7 +273,7 @@ header p {
   position: absolute;
   width: var(--dot);
   height: var(--dot);
-  border-radius: 50%;
+  border-radius: 3px;
   background: #111827;
   transition: transform .2s ease, opacity .2s ease;
 }
@@ -260,7 +306,7 @@ header p {
 
 .buttons {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
@@ -367,7 +413,7 @@ header p {
   position: absolute;
   width: var(--dot);
   height: var(--dot);
-  border-radius: 50%;
+  border-radius: 3px;
   background: #111827;
   transition: transform .55s ease, opacity .25s ease;
 }
@@ -628,9 +674,9 @@ CORES POR NÍVEL
     font-size: 26px;
   }
 
-  /* botões de resposta: 4 colunas, mais baixos */
+  /* botões de resposta: 5 colunas */
   .buttons {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     gap: 8px;
   }
 
