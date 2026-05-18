@@ -226,6 +226,7 @@ async function showHint() {
 
   // limpa palco
   stageInner.innerHTML = "";
+  stageInner.style.cssText = "";
   animLayer.innerHTML = "";
   elStageCounter.textContent = "0";
   elStageCounter.classList.remove("negative");
@@ -312,14 +313,82 @@ async function showHint() {
       }
     }
   } else {
-    // MULTIPLICAÇÃO: mostra a×b cubinhos no palco
-    const total = a * b;
-    const stageDots = [];
-    for (let i = 0; i < total; i++) {
-      stageDots.push(putFixedDot(i, "green"));
+    // MULTIPLICAÇÃO: 2 × 5 = "o 2 desce 5 vezes" → b grupos de a
+    // Layout horizontal: ●● + ●● + ●● + ●● + ●●  (com wrap)
+    let srcA = [...elDotsA.querySelectorAll(".dot")];
+    if (srcA.length === 0) srcA = [...elDotsA.querySelectorAll(".bar-unit")];
+    let srcB = [...elDotsB.querySelectorAll(".dot")];
+    if (srcB.length === 0) srcB = [...elDotsB.querySelectorAll(".bar-unit")];
+
+    const groups = b;
+    const perGroup = a;
+
+    stageInner.style.display = "flex";
+    stageInner.style.flexWrap = "wrap";
+    stageInner.style.alignItems = "center";
+    stageInner.style.gap = "6px";
+    stageInner.style.height = "auto";
+
+    for (let group = 0; group < groups; group++) {
+      const cls = group % 2 === 0 ? "blue" : "blue-alt";
+
+      if (srcB[group]) srcB[group].classList.add("active-group");
+
+      // "+" antes do grupo (exceto o primeiro)
+      if (group > 0) {
+        const plusEl = document.createElement("span");
+        plusEl.className = "mult-plus";
+        plusEl.textContent = "+";
+        stageInner.appendChild(plusEl);
+      }
+
+      // Container do grupo (invisível para pegar posições)
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "mult-group";
+      groupDiv.style.visibility = "hidden";
+      const dots = [];
+      for (let i = 0; i < perGroup; i++) {
+        const d = document.createElement("div");
+        d.className = "mult-dot " + cls;
+        dots.push(d);
+        groupDiv.appendChild(d);
+      }
+      stageInner.appendChild(groupDiv);
+
+      await wait(20);
+      const targetRects = dots.map(d => d.getBoundingClientRect());
+
+      // Ghosts voam da zona A para as posições do grupo
+      const ghosts = srcA.map(d => createGhost(d, cls));
+      await wait(30);
+      ghosts.forEach((g, i) => {
+        if (i < targetRects.length) {
+          setTimeout(() => {
+            const r = targetRects[i];
+            const dx = r.left - parseFloat(g.dataset.baseLeft);
+            const dy = r.top - parseFloat(g.dataset.baseTop);
+            g.style.transform = `translate(${dx}px, ${dy}px)`;
+          }, i * 60);
+        }
+      });
+      await wait(perGroup * 60 + 600);
+
+      // Revela grupo
+      animLayer.innerHTML = "";
+      groupDiv.style.visibility = "visible";
+
+      elStageCounter.textContent = (group + 1) * perGroup;
+
+      if (srcB[group]) {
+        srcB[group].classList.remove("active-group");
+        srcB[group].classList.add("fade-out");
+      }
+      await wait(350);
     }
-    await wait(300);
-    await countPulse(stageDots);
+
+    // Zona A some ao final
+    srcA.forEach(d => d.classList.add("fade-out"));
+    await wait(400);
   }
 
   // número voando pro resultado
@@ -415,6 +484,7 @@ function newQuestion() {
   elStageCounter.textContent = "?";
   elStageCounter.classList.remove("negative");
   stageInner.innerHTML = "";
+  stageInner.style.cssText = "";
   animLayer.innerHTML = "";
 
   // carrega conta
@@ -431,8 +501,8 @@ function newQuestion() {
   elOp.textContent = op;
   elOpBadge.textContent = op;
 
-  renderDots(elDotsA, a, "");
-  renderDots(elDotsB, b, (op === "+" ? "blue" : op === "-" ? "red" : "green"));
+  renderDots(elDotsA, a, (op === "×" ? "blue" : ""));
+  renderDots(elDotsB, b, (op === "+" ? "blue" : op === "-" ? "red" : "orange"));
 
   setBuddy("espera", `Nível ${conta.nivel}`, "Quanto dá?");
 

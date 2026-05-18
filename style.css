@@ -189,6 +189,11 @@ header p {
   background: #16a34a;
 }
 
+.dot.orange { background: #f97316; }
+.bar.orange .bar-unit { background: #f97316; }
+.stageDot.orange { background: #f97316; }
+.ghost.orange { background: #f97316; }
+
 .dot.green {
   background: #16a34a;
 }
@@ -199,6 +204,43 @@ header p {
 
 .ghost.green {
   background: #16a34a;
+}
+
+.stageDot.green-alt { background: #4ade80; }
+.ghost.green-alt { background: #4ade80; }
+
+.dot.active-group,
+.bar-unit.active-group {
+  outline: 3px solid #facc15;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+  transition: all 0.2s ease;
+}
+
+.mult-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.mult-dot {
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 3px;
+  transition: transform .2s ease;
+}
+
+.mult-dot.green { background: #16a34a; }
+.mult-dot.green-alt { background: #4ade80; }
+.mult-dot.blue { background: #2563eb; }
+.mult-dot.blue-alt { background: #60a5fa; }
+.mult-dot.pulse { transform: scale(1.5); }
+.fade-out { opacity: 0; transition: opacity 0.35s ease; }
+
+.mult-plus {
+  font-size: 20px;
+  font-weight: 900;
+  color: #94a3b8;
+  padding: 0 2px;
 }
 
 .opBadge {
@@ -425,6 +467,9 @@ header p {
 .ghost.blue {
   background: var(--blue);
 }
+
+.stageDot.blue-alt { background: #60a5fa; }
+.ghost.blue-alt { background: #60a5fa; }
 
 
 /* Fixa o tamanho do resultado para a conta não "dançar" */
