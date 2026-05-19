@@ -3,10 +3,6 @@
 //   script.js (refeito)
 // =========================
 
-// Base path (pasta onde este script.js mora). Funciona em qualquer HTML que carregue
-// o script via "./script.js" ou "../script.js" — assets png ficam ao lado do JS.
-const SCRIPT_BASE = new URL('.', document.currentScript.src).href;
-
 // ===== Estado do Jogo =====
 let perguntaAtualIndex = 0;
 let a = 0, b = 0, op = "+";
@@ -40,19 +36,48 @@ const animLayer = document.getElementById("animLayer");
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-// ===== Botões numéricos (0..10) =====
+const imgPrefix = (() => {
+  const s = document.querySelector('script[src*="script.js"]');
+  if (!s) return "";
+  const src = s.getAttribute("src");
+  return src.substring(0, src.lastIndexOf("/") + 1);
+})();
+
+// ===== Botões de resposta (5 opções: 1 certa + 4 erradas) =====
 const answerButtons = [];
-for (let i = 0; i <= 10; i++) {
-  const btn = document.createElement("button");
-  btn.textContent = i;
-  btn.addEventListener("click", () => checkAnswer(i));
-  buttonsDiv.appendChild(btn);
-  answerButtons.push(btn);
+
+function generateOptions(correct) {
+  const options = new Set([correct]);
+  while (options.size < 5) {
+    const offset = Math.floor(Math.random() * 5) + 1;
+    let d = Math.random() < 0.5 ? correct - offset : correct + offset;
+    if (d < 0) d = correct + offset;
+    options.add(d);
+  }
+  const arr = [...options];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderAnswerButtons(correct) {
+  buttonsDiv.innerHTML = "";
+  answerButtons.length = 0;
+  const options = generateOptions(correct);
+  for (const val of options) {
+    const btn = document.createElement("button");
+    btn.textContent = val;
+    btn.addEventListener("click", () => checkAnswer(val));
+    buttonsDiv.appendChild(btn);
+    answerButtons.push(btn);
+  }
 }
 
 // ===== Helpers UI =====
 function setBuddy(state, title, text) {
-  elBuddyImg.src = `${SCRIPT_BASE}${state}.png`;
+  elBuddyImg.src = `${imgPrefix}${state}.png`;
   document.getElementById("buddyTitle").textContent = title;
   document.getElementById("buddyText").textContent = text;
 }
@@ -99,10 +124,29 @@ function getStageSlot(index) {
 
 function renderDots(container, count, colorClass) {
   container.innerHTML = "";
-  for (let i = 0; i < count; i++) {
-    const d = document.createElement("div");
-    d.className = "dot" + (colorClass ? " " : "") + colorClass;
-    container.appendChild(d);
+  const tens = Math.floor(count / 10);
+  const units = count % 10;
+
+  for (let i = 0; i < tens; i++) {
+    const bar = document.createElement("div");
+    bar.className = "bar" + (colorClass ? " " + colorClass : "");
+    for (let j = 0; j < 10; j++) {
+      const u = document.createElement("div");
+      u.className = "bar-unit";
+      bar.appendChild(u);
+    }
+    container.appendChild(bar);
+  }
+
+  if (units > 0) {
+    const row = document.createElement("div");
+    row.className = "units";
+    for (let i = 0; i < units; i++) {
+      const d = document.createElement("div");
+      d.className = "dot" + (colorClass ? " " + colorClass : "");
+      row.appendChild(d);
+    }
+    container.appendChild(row);
   }
 }
 
@@ -130,7 +174,7 @@ function moveGhost(ghost, slot) {
 async function checkAnswer(value) {
   if (answered || hintRunning) return;
 
-  const correct = (op === "+") ? (a + b) : (a - b);
+  const correct = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
 
   // AQUI é o ponto que você pediu:
   // desativa os botões numéricos e ativa o Próxima
@@ -182,11 +226,12 @@ async function showHint() {
 
   // limpa palco
   stageInner.innerHTML = "";
+  stageInner.style.cssText = "";
   animLayer.innerHTML = "";
   elStageCounter.textContent = "0";
   elStageCounter.classList.remove("negative");
 
-  const result = (op === "+") ? (a + b) : (a - b);
+  const result = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
 
   const dtsA = [...elDotsA.querySelectorAll(".dot")];
   const dtsB = [...elDotsB.querySelectorAll(".dot")];
@@ -209,7 +254,7 @@ async function showHint() {
 
     await countPulse(stageDots);
 
-  } else {
+  } else if (op === "-") {
     // SUBTRAÇÃO
     // 1) Move A pro palco
     const ghostsA = dtsA.map(d => createGhost(d, ""));
@@ -267,6 +312,88 @@ async function showHint() {
         remain[i].classList.remove("pulse");
       }
     }
+  } else {
+    // MULTIPLICAÇÃO: 2 × 5 = "o 2 desce 5 vezes" → b grupos de a
+    // Layout horizontal: ●● + ●● + ●● + ●● + ●●  (com wrap)
+    let srcA = [...elDotsA.querySelectorAll(".dot")];
+    if (srcA.length === 0) srcA = [...elDotsA.querySelectorAll(".bar-unit")];
+    let srcB = [...elDotsB.querySelectorAll(".dot")];
+    if (srcB.length === 0) srcB = [...elDotsB.querySelectorAll(".bar-unit")];
+
+    const groups = b;
+    const perGroup = a;
+
+    stageInner.style.display = "flex";
+    stageInner.style.flexWrap = "wrap";
+    stageInner.style.alignItems = "center";
+    stageInner.style.gap = "6px";
+    stageInner.style.height = "auto";
+
+    for (let group = 0; group < groups; group++) {
+      const cls = group % 2 === 0 ? "blue" : "blue-alt";
+
+      if (srcB[group]) srcB[group].classList.add("active-group");
+
+      // Wrapper que mantém [grupo + plus] na mesma linha
+      const wrapper = document.createElement("div");
+      wrapper.className = "mult-wrapper";
+
+      // Container do grupo (invisível para pegar posições)
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "mult-group";
+      groupDiv.style.visibility = "hidden";
+      const dots = [];
+      for (let i = 0; i < perGroup; i++) {
+        const d = document.createElement("div");
+        d.className = "mult-dot " + cls;
+        dots.push(d);
+        groupDiv.appendChild(d);
+      }
+      wrapper.appendChild(groupDiv);
+      stageInner.appendChild(wrapper);
+
+      await wait(20);
+      const targetRects = dots.map(d => d.getBoundingClientRect());
+
+      // Ghosts voam da zona A para as posições do grupo
+      const ghosts = srcA.map(d => createGhost(d, cls));
+      await wait(30);
+      ghosts.forEach((g, i) => {
+        if (i < targetRects.length) {
+          setTimeout(() => {
+            const r = targetRects[i];
+            const dx = r.left - parseFloat(g.dataset.baseLeft);
+            const dy = r.top - parseFloat(g.dataset.baseTop);
+            g.style.transform = `translate(${dx}px, ${dy}px)`;
+          }, i * 60);
+        }
+      });
+      await wait(perGroup * 60 + 600);
+
+      // Revela grupo
+      animLayer.innerHTML = "";
+      groupDiv.style.visibility = "visible";
+
+      // "+" aparece depois do grupo revelado (exceto o último)
+      if (group < groups - 1) {
+        const plusEl = document.createElement("span");
+        plusEl.className = "mult-plus";
+        plusEl.textContent = "+";
+        wrapper.appendChild(plusEl);
+      }
+
+      elStageCounter.textContent = (group + 1) * perGroup;
+
+      if (srcB[group]) {
+        srcB[group].classList.remove("active-group");
+        srcB[group].classList.add("fade-out");
+      }
+      await wait(350);
+    }
+
+    // Zona A some ao final
+    srcA.forEach(d => d.classList.add("fade-out"));
+    await wait(400);
   }
 
   // número voando pro resultado
@@ -362,10 +489,8 @@ function newQuestion() {
   elStageCounter.textContent = "?";
   elStageCounter.classList.remove("negative");
   stageInner.innerHTML = "";
+  stageInner.style.cssText = "";
   animLayer.innerHTML = "";
-
-  // botões numéricos ativos
-  setAnswerButtonsDisabled(false);
 
   // carrega conta
   const conta = bancoDeContas.contas[perguntaAtualIndex];
@@ -373,13 +498,16 @@ function newQuestion() {
   b = conta.b;
   op = conta.operacao;
 
+  const correct = (op === "+") ? (a + b) : (op === "-") ? (a - b) : (a * b);
+  renderAnswerButtons(correct);
+
   elN1.textContent = a;
   elN2.textContent = b;
   elOp.textContent = op;
   elOpBadge.textContent = op;
 
-  renderDots(elDotsA, a, "");
-  renderDots(elDotsB, b, (op === "+" ? "blue" : "red"));
+  renderDots(elDotsA, a, (op === "×" ? "blue" : ""));
+  renderDots(elDotsB, b, (op === "+" ? "blue" : op === "-" ? "red" : "orange"));
 
   setBuddy("espera", `Nível ${conta.nivel}`, "Quanto dá?");
 

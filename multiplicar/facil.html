@@ -4,11 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Subtrair</title>
+  <title>Multiplicação</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  
 </head>
 
 <body>
@@ -16,43 +15,43 @@
   <div>
     <script id="dados-jogo">
     const bancoDeContas = {
-      "jogo": "Adição e Subtração",
+      "jogo": "Multiplicação",
       "versao": 1,
       "contas": [
-        { "id": 2, "nivel": 1, "operacao": "-", "a": 2, "b": 1 },
-        { "id": 1, "nivel": 1, "operacao": "-", "a": 1, "b": 0 },
-        { "id": 3, "nivel": 1, "operacao": "-", "a": 3, "b": 1 },
-        { "id": 4, "nivel": 1, "operacao": "-", "a": 3, "b": 2 },
-        { "id": 5, "nivel": 1, "operacao": "-", "a": 2, "b": 1 },
-        { "id": 6, "nivel": 1, "operacao": "-", "a": 3, "b": 0 },
-        { "id": 7, "nivel": 1, "operacao": "-", "a": 4, "b": 1 },
-        { "id": 8, "nivel": 1, "operacao": "-", "a": 4, "b": 2 },
-        { "id": 9, "nivel": 1, "operacao": "-", "a": 4, "b": 3 },
-        { "id": 10, "nivel": 1, "operacao": "-", "a": 1, "b": 1 },
+          { "id": 1,  "nivel": 2, "operacao": "×", "a": 2, "b": 2 },
+          { "id": 2,  "nivel": 2, "operacao": "×", "a": 2, "b": 3 },
+          { "id": 3,  "nivel": 2, "operacao": "×", "a": 3, "b": 2 },
+          { "id": 4,  "nivel": 2, "operacao": "×", "a": 2, "b": 4 },
+          { "id": 5,  "nivel": 2, "operacao": "×", "a": 4, "b": 2 },
+          { "id": 6,  "nivel": 2, "operacao": "×", "a": 2, "b": 5 },
+          { "id": 7,  "nivel": 2, "operacao": "×", "a": 5, "b": 2 },
+          { "id": 8,  "nivel": 2, "operacao": "×", "a": 3, "b": 3 },
+          { "id": 9,  "nivel": 2, "operacao": "×", "a": 3, "b": 4 },
+          { "id": 10, "nivel": 2, "operacao": "×", "a": 4, "b": 3 },
 
-        { "id": 11, "nivel": 1, "operacao": "-", "a": 2, "b": 2 },
-        { "id": 12, "nivel": 1, "operacao": "-", "a": 3, "b": 3 },
-        { "id": 13, "nivel": 1, "operacao": "-", "a": 4, "b": 4 },
-        { "id": 14, "nivel": 1, "operacao": "-", "a": 3, "b": 1 },
-        { "id": 15, "nivel": 1, "operacao": "-", "a": 2, "b": 1 },
-        { "id": 16, "nivel": 1, "operacao": "-", "a": 4, "b": 1 },
-        { "id": 17, "nivel": 1, "operacao": "-", "a": 3, "b": 2 },
-        { "id": 18, "nivel": 1, "operacao": "-", "a": 4, "b": 2 },
-        { "id": 19, "nivel": 1, "operacao": "-", "a": 4, "b": 3 },
-        { "id": 20, "nivel": 1, "operacao": "-", "a": 2, "b": 0 },
+          { "id": 11, "nivel": 2, "operacao": "×", "a": 3, "b": 5 },
+          { "id": 12, "nivel": 2, "operacao": "×", "a": 5, "b": 3 },
+          { "id": 13, "nivel": 2, "operacao": "×", "a": 4, "b": 4 },
+          { "id": 14, "nivel": 2, "operacao": "×", "a": 4, "b": 5 },
+          { "id": 15, "nivel": 2, "operacao": "×", "a": 5, "b": 4 },
+          { "id": 16, "nivel": 2, "operacao": "×", "a": 5, "b": 5 },
+          { "id": 17, "nivel": 2, "operacao": "×", "a": 2, "b": 3 },
+          { "id": 18, "nivel": 2, "operacao": "×", "a": 3, "b": 4 },
+          { "id": 19, "nivel": 2, "operacao": "×", "a": 4, "b": 5 },
+          { "id": 20, "nivel": 2, "operacao": "×", "a": 5, "b": 3 },
 
-        { "id": 21, "nivel": 1, "operacao": "-", "a": 3, "b": 0 },
-        { "id": 22, "nivel": 1, "operacao": "-", "a": 1, "b": 0 },
-        { "id": 23, "nivel": 1, "operacao": "-", "a": 2, "b": 1 },
-        { "id": 24, "nivel": 1, "operacao": "-", "a": 3, "b": 1 },
-        { "id": 25, "nivel": 1, "operacao": "-", "a": 3, "b": 2 },
+          { "id": 21, "nivel": 2, "operacao": "×", "a": 3, "b": 2 },
+          { "id": 22, "nivel": 2, "operacao": "×", "a": 2, "b": 4 },
+          { "id": 23, "nivel": 2, "operacao": "×", "a": 5, "b": 2 },
+          { "id": 24, "nivel": 2, "operacao": "×", "a": 4, "b": 3 },
+          { "id": 25, "nivel": 2, "operacao": "×", "a": 3, "b": 5 },
 
-        { "id": 26, "nivel": 1, "operacao": "-", "a": 2, "b": 2 },
-        { "id": 27, "nivel": 1, "operacao": "-", "a": 2, "b": 1 },
-        { "id": 28, "nivel": 1, "operacao": "-", "a": 4, "b": 1 },
-        { "id": 29, "nivel": 1, "operacao": "-", "a": 2, "b": 0 },
-        { "id": 30, "nivel": 1, "operacao": "-", "a": 3, "b": 3 }
-      ]
+          { "id": 26, "nivel": 2, "operacao": "×", "a": 5, "b": 4 },
+          { "id": 27, "nivel": 2, "operacao": "×", "a": 2, "b": 5 },
+          { "id": 28, "nivel": 2, "operacao": "×", "a": 4, "b": 4 },
+          { "id": 29, "nivel": 2, "operacao": "×", "a": 5, "b": 5 },
+          { "id": 30, "nivel": 2, "operacao": "×", "a": 2, "b": 2 }
+        ]
     };
   </script>
   </div>
@@ -63,19 +62,19 @@
 
           <button class="nivel muito-facil"
               onclick="window.location.href='muitoFacil.html'">
-              <i class="fa-solid fa-circle-check"></i>
             Muito Fácil
           </button>
           <button class="nivel facil"
-              onclick="window.location.href='facil.html'">     
+              onclick="window.location.href='facil.html'">
+              <i class="fa-solid fa-circle-check"></i>
             Fácil
           </button>
-          
+
           <button class="nivel medio"
               onclick="window.location.href='medio.html'">
             Médio
           </button>
-          
+
           <button class="nivel dificil"
               onclick="window.location.href='dificil.html'">
             Difícil
@@ -89,9 +88,9 @@
           <div class="operacoes">
             <select id="operacao">
               <option value="../soma.html">➕ Somar</option>
-              <option value="../subtracao.html" selected>➖ Subtrair</option>
+              <option value="../subtracao.html">➖ Subtrair</option>
               <option value="../misturado.html">🔢 Misturado</option>
-                          <option value="../multiplicacao.html">✖️ Multiplicar</option>
+              <option value="../multiplicacao.html" selected>✖️ Multiplicar</option>
             </select>
           </div>
         <div class="stats">
@@ -102,7 +101,7 @@
       </div>
       </div>
       <button class="btn btn-reset" id="btnReset" type="button">
-        <i class="fa-solid fa-rotate-left"></i> 
+        <i class="fa-solid fa-rotate-left"></i>
       </button>
     </header>
 
@@ -113,7 +112,7 @@
             <div class="zoneTitle">1º número</div>
             <div class="dots" id="dotsA"></div>
           </div>
-          <div class="opBadge" id="opBadge">+</div>
+          <div class="opBadge" id="opBadge">×</div>
           <div class="zone" id="zoneB">
             <div class="zoneTitle">2º número</div>
             <div class="dots" id="dotsB"></div>
@@ -129,7 +128,7 @@
         <div class="question">
           <div class="big">
             <span id="n1">?</span>
-            <span id="op">+</span>
+            <span id="op">×</span>
             <span id="n2">?</span>
             =
             <span id="finalQuestionText">?</span>
