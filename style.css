@@ -85,7 +85,9 @@ header p {
   right: 15px;
   width: 65px;
   height: 40px;
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-hint {
@@ -474,13 +476,12 @@ CORES POR NÍVEL
   background: #f59e0b;
 }
 
-/* Difícil → Vermelho */
+/* Difícil → Roxo */
 .dificil {
   background: #7c3aed;
-
 }
 
-/* Muito Difícil → Roxo escuro */
+/* Muito Difícil → Vermelho */
 .muito-dificil {
   background: #ef4444;
 }

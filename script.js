@@ -3,6 +3,10 @@
 //   script.js (refeito)
 // =========================
 
+// Base path (pasta onde este script.js mora). Funciona em qualquer HTML que carregue
+// o script via "./script.js" ou "../script.js" — assets png ficam ao lado do JS.
+const SCRIPT_BASE = new URL('.', document.currentScript.src).href;
+
 // ===== Estado do Jogo =====
 let perguntaAtualIndex = 0;
 let a = 0, b = 0, op = "+";
@@ -48,7 +52,7 @@ for (let i = 0; i <= 10; i++) {
 
 // ===== Helpers UI =====
 function setBuddy(state, title, text) {
-  elBuddyImg.src = `../${state}.png`;
+  elBuddyImg.src = `${SCRIPT_BASE}${state}.png`;
   document.getElementById("buddyTitle").textContent = title;
   document.getElementById("buddyText").textContent = text;
 }
