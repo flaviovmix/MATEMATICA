@@ -334,13 +334,9 @@ async function showHint() {
 
       if (srcB[group]) srcB[group].classList.add("active-group");
 
-      // "+" antes do grupo (exceto o primeiro)
-      if (group > 0) {
-        const plusEl = document.createElement("span");
-        plusEl.className = "mult-plus";
-        plusEl.textContent = "+";
-        stageInner.appendChild(plusEl);
-      }
+      // Wrapper que mantém [grupo + plus] na mesma linha
+      const wrapper = document.createElement("div");
+      wrapper.className = "mult-wrapper";
 
       // Container do grupo (invisível para pegar posições)
       const groupDiv = document.createElement("div");
@@ -353,7 +349,8 @@ async function showHint() {
         dots.push(d);
         groupDiv.appendChild(d);
       }
-      stageInner.appendChild(groupDiv);
+      wrapper.appendChild(groupDiv);
+      stageInner.appendChild(wrapper);
 
       await wait(20);
       const targetRects = dots.map(d => d.getBoundingClientRect());
@@ -376,6 +373,14 @@ async function showHint() {
       // Revela grupo
       animLayer.innerHTML = "";
       groupDiv.style.visibility = "visible";
+
+      // "+" aparece depois do grupo revelado (exceto o último)
+      if (group < groups - 1) {
+        const plusEl = document.createElement("span");
+        plusEl.className = "mult-plus";
+        plusEl.textContent = "+";
+        wrapper.appendChild(plusEl);
+      }
 
       elStageCounter.textContent = (group + 1) * perGroup;
 

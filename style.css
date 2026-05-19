@@ -216,6 +216,13 @@ header p {
   transition: all 0.2s ease;
 }
 
+.mult-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .mult-group {
   display: flex;
   gap: 4px;
