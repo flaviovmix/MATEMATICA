@@ -36,6 +36,36 @@ const animLayer = document.getElementById("animLayer");
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
+// ===== Painel da tabuada (visível em telas grandes durante multiplicação) =====
+const tabuadaPanel = document.createElement("div");
+tabuadaPanel.className = "tabuada-panel";
+document.body.appendChild(tabuadaPanel);
+
+function renderTabuada() {
+  if (op !== "×") {
+    tabuadaPanel.classList.remove("active");
+    return;
+  }
+  tabuadaPanel.classList.add("active");
+  tabuadaPanel.classList.remove("revealed");
+  let html = `<div class="tabuada-title">Tabuada do ${a}</div>`;
+  for (let i = 1; i <= 10; i++) {
+    const cls = i === b ? "tabuada-line highlight" : "tabuada-line";
+    html += `<div class="${cls}"><span>${a} × ${i}</span><span class="resultado">= ${a * i}</span></div>`;
+  }
+  html += `<button class="tabuada-reveal-btn" type="button">Mostrar respostas</button>`;
+  tabuadaPanel.innerHTML = html;
+
+  // Stagger da animação de entrada (60ms entre linhas)
+  tabuadaPanel.querySelectorAll(".tabuada-line").forEach((line, i) => {
+    line.querySelector(".resultado").style.transitionDelay = (i * 60) + "ms";
+  });
+
+  tabuadaPanel.querySelector(".tabuada-reveal-btn").addEventListener("click", () => {
+    tabuadaPanel.classList.add("revealed");
+  });
+}
+
 const imgPrefix = (() => {
   const s = document.querySelector('script[src*="script.js"]');
   if (!s) return "";
@@ -190,25 +220,17 @@ async function checkAnswer(value) {
     hits++;
     elMsg.textContent = "Acertou! 🎉";
     setBuddy("acertou", "Incrível!", "Você domina tudo!");
-
-    setStats();
-    updateControls();
-
-    // mesmo acertando, roda a animação
-    await wait(350);
-    await showHint();
-
   } else {
     miss++;
     elMsg.textContent = "Ops! Vamos ver?";
     setBuddy("errou", "Observe...", "Vou te ensinar o caminho.");
-
-    setStats();
-    updateControls();
-
-    await wait(700);
-    await showHint();
   }
+
+  setStats();
+  updateControls();
+
+  // Em vez de rodar a animação automaticamente, mostra botão "Exibir animação"
+  showStageButton("Exibir animação", () => showHint());
 }
 
 // ===== Dica/Explicar (animação) =====
@@ -410,6 +432,150 @@ async function showHint() {
   }
 
   updateControls();
+
+  // Multiplicação: oferecer botão "Agrupar" se faz sentido (>= 10 dots)
+  if (op === "×" && a * b >= 10) {
+    const aFixed = a, bFixed = b;
+    showStageButton("Agrupar em dezenas", () => runGroupingAnimation(aFixed, bFixed));
+  }
+}
+
+// ===== Botões de ação flutuantes no stage =====
+function removeStageButtons() {
+  document.querySelectorAll(".stage-action-wrap").forEach(b => b.remove());
+}
+
+function showStageButton(label, onClick) {
+  removeStageButtons();
+  const wrap = document.createElement("div");
+  wrap.className = "stage-action-wrap";
+  const btn = document.createElement("button");
+  btn.className = "btn btn-stage-action";
+  btn.type = "button";
+  btn.textContent = label;
+  wrap.appendChild(btn);
+
+  document.getElementById("stage").appendChild(wrap);
+
+  btn.addEventListener("click", async () => {
+    wrap.remove();
+    await onClick();
+  }, { once: true });
+}
+
+async function runGroupingAnimation(aVal, bVal) {
+  if (hintRunning) return;
+  hintRunning = true;
+  updateControls();
+
+  const allMultDots = [...stageInner.querySelectorAll(".mult-dot")];
+  const startRects = allMultDots.map(d => d.getBoundingClientRect());
+
+  // Cria ghosts em cima dos mult-dots atuais (todos azuis durante o voo)
+  animLayer.innerHTML = "";
+  const regroupGhosts = startRects.map(r => {
+    const g = document.createElement("div");
+    g.className = "ghost blue";
+    g.style.width = r.width + "px";
+    g.style.height = r.height + "px";
+    g.style.left = r.left + "px";
+    g.style.top = r.top + "px";
+    g.dataset.baseLeft = r.left;
+    g.dataset.baseTop = r.top;
+    animLayer.appendChild(g);
+    return g;
+  });
+
+  // Fade out dos mult-dots originais + sinais "+"
+  stageInner.querySelectorAll(".mult-plus").forEach(p => p.classList.add("fade-out"));
+  allMultDots.forEach(d => d.classList.add("fade-out"));
+  await wait(350);
+
+  // Constrói layout final: floor(total/10) barras de 10 + (total%10) dots soltos
+  const total = aVal * bVal;
+  const numBars = Math.floor(total / 10);
+  const numUnits = total % 10;
+
+  stageInner.innerHTML = "";
+  stageInner.style.flexDirection = "column";
+  stageInner.style.alignItems = "flex-start";
+  stageInner.style.gap = "6px";
+
+  const finalDotEls = [];
+  for (let i = 0; i < numBars; i++) {
+    const bar = document.createElement("div");
+    bar.className = "bar purple";
+    for (let j = 0; j < 10; j++) {
+      const u = document.createElement("div");
+      u.className = "bar-unit";
+      u.style.opacity = "0";
+      bar.appendChild(u);
+      finalDotEls.push(u);
+    }
+    stageInner.appendChild(bar);
+  }
+  if (numUnits > 0) {
+    const unitRow = document.createElement("div");
+    unitRow.className = "units";
+    for (let i = 0; i < numUnits; i++) {
+      const d = document.createElement("div");
+      d.className = "dot blue";
+      d.style.opacity = "0";
+      unitRow.appendChild(d);
+      finalDotEls.push(d);
+    }
+    stageInner.appendChild(unitRow);
+  }
+
+  await wait(30);
+  const endRects = finalDotEls.map(d => d.getBoundingClientRect());
+
+  // Dispara todos os voos (stagger curto pra caber 100 dots)
+  const stagger = 15;
+  const flightDur = 600;
+  regroupGhosts.forEach((g, i) => {
+    if (i >= endRects.length) return;
+    const r = endRects[i];
+    const dx = r.left - parseFloat(g.dataset.baseLeft);
+    const dy = r.top - parseFloat(g.dataset.baseTop);
+    setTimeout(() => {
+      g.style.width = r.width + "px";
+      g.style.height = r.height + "px";
+      g.style.transform = `translate(${dx}px, ${dy}px)`;
+    }, i * stagger);
+  });
+
+  // Revela cada barra quando o 10º dot pousa (vira roxa nesse momento)
+  let elapsed = 0;
+  for (let barIdx = 0; barIdx < numBars; barIdx++) {
+    const lastIdx = barIdx * 10 + 9;
+    const arriveAt = lastIdx * stagger + flightDur;
+    await wait(arriveAt - elapsed);
+    elapsed = arriveAt;
+    for (let k = 0; k < 10; k++) {
+      finalDotEls[barIdx * 10 + k].style.opacity = "1";
+      regroupGhosts[barIdx * 10 + k].remove();
+    }
+    await wait(150);
+    elapsed += 150;
+  }
+
+  // Revela dots soltos (sobras azuis) quando o último pousar
+  if (numUnits > 0) {
+    const lastUnitIdx = numBars * 10 + numUnits - 1;
+    const unitArriveAt = lastUnitIdx * stagger + flightDur;
+    await wait(Math.max(0, unitArriveAt - elapsed));
+    for (let k = 0; k < numUnits; k++) {
+      finalDotEls[numBars * 10 + k].style.opacity = "1";
+      regroupGhosts[numBars * 10 + k].remove();
+    }
+  }
+
+  animLayer.innerHTML = "";
+  await wait(250);
+
+  hintRunning = false;
+  updateControls();
 }
 
 // ===== Palco: bolinhas fixas =====
@@ -475,6 +641,7 @@ async function animateNumberToEquation(finalValue) {
 function newQuestion() {
   answered = false;
   hintRunning = false;
+  removeStageButtons();
 
   // reset textos
   elMsg.textContent = "";
@@ -511,6 +678,8 @@ function newQuestion() {
 
   setBuddy("espera", `Nível ${conta.nivel}`, "Quanto dá?");
 
+  renderTabuada();
+
   // avança índice
   perguntaAtualIndex = (perguntaAtualIndex + 1) % bancoDeContas.contas.length;
 
@@ -525,10 +694,6 @@ btnNext.addEventListener("click", () => {
 });
 
 btnReset.addEventListener("click", () => {
-  hits = 0;
-  miss = 0;
-  perguntaAtualIndex = 0;
-  setStats();
   newQuestion();
 });
 
@@ -538,5 +703,13 @@ btnHint.addEventListener("click", async () => {
 });
 
 // ===== Start =====
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+shuffle(bancoDeContas.contas);
+
 setStats();
 newQuestion();

@@ -15,7 +15,7 @@
   --zoneMinH: 92px;
   --titleSize: 18px;
   --questionSize: 38px;
-  --avatarSize: 200px;
+  --avatarSize: 280px;
 }
 
 * {
@@ -187,6 +187,10 @@ header p {
 
 .bar.green .bar-unit {
   background: #16a34a;
+}
+
+.bar.purple .bar-unit {
+  background: #7c3aed;
 }
 
 .dot.orange { background: #f97316; }
@@ -432,23 +436,50 @@ header p {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  justify-content: center;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
 }
 
 .avatar-container {
-  width: var(--avatarSize);
-  height: var(--avatarSize);
-  margin-bottom: 15px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 0;
 }
 
 .buddy-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  margin-top: -60px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+
+.buddy h2,
+.buddy p {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.buddy h2 {
+  margin-bottom: 6px;
+  margin-top: 0;
+}
+
+.buddy p {
+  margin-bottom: 16px;
+  margin-top: 0;
 }
 
 #animLayer {
@@ -587,6 +618,116 @@ CORES POR NÍVEL
   padding: 5px;
   border-radius: 5px;
   margin-top: 5px;
+}
+
+/* =========================
+   PAINEL DA TABUADA (telas grandes, só multiplicação)
+   ========================= */
+.tabuada-panel {
+  display: none;
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 22px;
+  min-width: 200px;
+  border: 1px solid #eef2ff;
+}
+
+@media (min-width: 1400px) {
+  .tabuada-panel.active {
+    display: block;
+  }
+}
+
+.tabuada-title {
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 14px;
+  color: var(--text);
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eef2ff;
+}
+
+.tabuada-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  border-radius: 6px;
+}
+
+.tabuada-line.highlight {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.tabuada-line .resultado {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.tabuada-panel.revealed .tabuada-line .resultado {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.tabuada-reveal-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 10px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tabuada-reveal-btn:hover {
+  background: #1f2937;
+}
+
+/* =========================
+   BOTÕES DE AÇÃO FLUTUANTES NO STAGE
+   ========================= */
+.stage-action-wrap {
+  position: absolute;
+  right: 12px;
+  bottom: -18px;
+  margin: 0;
+  z-index: 10;
+}
+
+.btn-stage-action {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-stage-action:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+}
+
+.tabuada-panel.revealed .tabuada-reveal-btn {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 
